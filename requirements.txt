@@ -1,0 +1,9 @@
+bentoml
+torch
+transformers
+diffusers
+accelerate
+xformers
+opencv-python
+pillow
+pydantic

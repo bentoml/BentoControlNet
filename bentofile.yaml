@@ -1,0 +1,9 @@
+service: "service.py:svc"
+include:
+  - "*.py"
+python:
+  requirements_txt: "./requirements.txt"
+docker:
+    distro: debian
+    system_packages:
+      - ffmpeg
