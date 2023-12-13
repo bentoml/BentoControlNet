@@ -4,9 +4,21 @@ import bentoml
 from bentoml.models import ModelContext
 
 MODELS = {
-    "controlnet": (ControlNetModel, "diffusers/controlnet-canny-sdxl-1.0", "sdxl-controlnet"),
-    "vae": (AutoencoderKL, "madebyollin/sdxl-vae-fp16-fix", "sdxl-controlnet-vae"),
-    "base": (StableDiffusionXLPipeline, "stabilityai/stable-diffusion-xl-base-1.0", "sdxl-controlnet-base"),
+    "controlnet": (
+        ControlNetModel,
+        "diffusers/controlnet-canny-sdxl-1.0",
+        "sdxl-controlnet",
+    ),
+    "vae": (
+        AutoencoderKL,
+        "madebyollin/sdxl-vae-fp16-fix",
+        "sdxl-controlnet-vae",
+    ),
+    "base": (
+        StableDiffusionXLPipeline,
+        "stabilityai/stable-diffusion-xl-base-1.0",
+        "sdxl-controlnet-base",
+    ),
 }
 
 def import_models(force_redownload=False):
