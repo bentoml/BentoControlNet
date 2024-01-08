@@ -1,7 +1,7 @@
 from diffusers import StableDiffusionXLPipeline, ControlNetModel, AutoencoderKL
 
 import bentoml
-from bentoml.models import ModelContext
+
 
 MODELS = {
     "controlnet": (
@@ -21,6 +21,7 @@ MODELS = {
     ),
 }
 
+
 def import_models(force_redownload=False):
 
     for model_class, model_id, saved_model_name in MODELS.values():
@@ -31,13 +32,7 @@ def import_models(force_redownload=False):
             except bentoml.exceptions.NotFound:
                 pass
 
-        with bentoml.models.create(
-                saved_model_name,
-                metadata={},
-                module="bentoml.diffusers",
-                context=ModelContext(framework_name="", framework_versions={}),
-                signatures={},
-        ) as bento_model:
+        with bentoml.models.create(saved_model_name) as bento_model:
             model_class.from_pretrained(model_id).save_pretrained(bento_model.path)
 
 
