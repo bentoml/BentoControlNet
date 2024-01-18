@@ -1,4 +1,4 @@
-bentoml
+bentoml>=1.2.0a0
 torch
 transformers
 diffusers
@@ -6,4 +6,3 @@ accelerate
 xformers
 opencv-python
 pillow
-pydantic
