@@ -17,7 +17,12 @@ CONTROLNET_MODEL_ID = "diffusers/controlnet-canny-sdxl-1.0"
 VAE_MODEL_ID = "madebyollin/sdxl-vae-fp16-fix"
 BASE_MODEL_ID = "stabilityai/stable-diffusion-xl-base-1.0"
 
-@bentoml.service(traffic={"timeout": 600}, workers=1, resources={"gpu": "1"})
+
+@bentoml.service(
+    traffic={"timeout": 600},
+    workers=1,
+    resources={"gpu": "1", "memory": "16Gi"}
+)
 class SDXLControlNetService(bentoml.Runnable):
 
     def __init__(self) -> None:
@@ -62,6 +67,7 @@ class Params(BaseModel):
     prompt: str
     negative_prompt: t.Optional[str]
     controlnet_conditioning_scale: float = 0.5
+    num_inference_steps: int = 25
 
 params_sample = Params(
     prompt="aerial view, a futuristic bento box in a bright foggy jungle, hard lighting",
