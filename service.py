@@ -13,12 +13,12 @@ from pydantic import BaseModel
 
 import bentoml
 
+CONTROLNET_MODEL_ID = "diffusers/controlnet-canny-sdxl-1.0"
+VAE_MODEL_ID = "madebyollin/sdxl-vae-fp16-fix"
+BASE_MODEL_ID = "stabilityai/stable-diffusion-xl-base-1.0"
 
 @bentoml.service(traffic={"timeout": 600}, workers=1, resources={"gpu": "1"})
 class SDXLControlNetService(bentoml.Runnable):
-    controlnet_model_ref = bentoml.models.get("sdxl-controlnet")
-    base_model_ref = bentoml.models.get("sdxl-controlnet-base")
-    vae_model_ref = bentoml.models.get("sdxl-controlnet-vae")
 
     def __init__(self) -> None:
 
@@ -30,17 +30,17 @@ class SDXLControlNetService(bentoml.Runnable):
             self.dtype = torch.float32
 
         self.controlnet = ControlNetModel.from_pretrained(
-            self.controlnet_model_ref.path,
+            CONTROLNET_MODEL_ID,
             torch_dtype=self.dtype,
         )
 
         self.vae = AutoencoderKL.from_pretrained(
-            self.vae_model_ref.path,
+            VAE_MODEL_ID,
             torch_dtype=self.dtype,
         )
 
         self.pipe = StableDiffusionXLControlNetPipeline.from_pretrained(
-            self.base_model_ref.path,
+            BASE_MODEL_ID,
             controlnet=self.controlnet,
             vae=self.vae,
             torch_dtype=self.dtype
