@@ -23,7 +23,7 @@ BASE_MODEL_ID = "stabilityai/stable-diffusion-xl-base-1.0"
     workers=1,
     resources={"gpu": "1", "memory": "16Gi"}
 )
-class SDXLControlNetService(bentoml.Runnable):
+class SDXLControlNetService:
 
     def __init__(self) -> None:
 
@@ -68,11 +68,6 @@ class Params(BaseModel):
     negative_prompt: t.Optional[str]
     controlnet_conditioning_scale: float = 0.5
     num_inference_steps: int = 25
-
-params_sample = Params(
-    prompt="aerial view, a futuristic bento box in a bright foggy jungle, hard lighting",
-    negative_prompt="low quality, bad quality, sketches",
-)
 
 
 @bentoml.service(
