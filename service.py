@@ -21,7 +21,12 @@ BASE_MODEL_ID = "stabilityai/stable-diffusion-xl-base-1.0"
 @bentoml.service(
     traffic={"timeout": 600},
     workers=1,
-    resources={"gpu": "1", "memory": "16Gi"}
+    resources={
+        "gpu": "1",
+        "gpu_type": "nvidia-l4",
+        # we can also specify GPU memory requirement:
+        # "memory": "16Gi",
+    }
 )
 class SDXLControlNetService:
 
