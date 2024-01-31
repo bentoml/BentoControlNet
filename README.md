@@ -9,6 +9,8 @@ This project demonstrates how to build a ControlNet application using BentoML, p
 ## Install dependencies
 
 ```bash
+git clone -b 1.2 https://github.com/bentoml/BentoControlNet.git
+cd BentoControlNet
 pip install -r requirements.txt
 ```
 
