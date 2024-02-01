@@ -81,7 +81,7 @@ class Params(BaseModel):
     workers=8,
 resources={"cpu": "1"}
 )
-class APIService:
+class ControlNet:
     controlnet_service: SDXLControlNetService = bentoml.depends(SDXLControlNetService)
 
     @bentoml.api

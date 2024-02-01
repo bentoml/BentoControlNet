@@ -1,4 +1,4 @@
-service: "service.py:APIService"
+service: "service.py:ControlNet"
 labels:
   owner: bentoml-team
   stage: demo
