@@ -1,58 +1,76 @@
-## SDXL with ControlNet example
+This project demonstrates how to build a ControlNet application using BentoML, powered by [diffusers](https://github.com/huggingface/diffusers).
 
-### Prerequisites
+## Prerequisites
 
-You have installed Python 3.8 (or later) and `pip`.
+- You have installed Python 3.9+ and `pip`. See the [Python downloads page](https://www.python.org/downloads/) to learn more.
+- You have a basic understanding of key concepts in BentoML, such as Services. We recommend you read [Quickstart](https://docs.bentoml.com/en/1.2/get-started/quickstart.html) first.
+- (Optional) We recommend you create a virtual environment for dependency isolation for this project. See the [Conda documentation](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or the [Python documentation](https://docs.python.org/3/library/venv.html) for details.
 
-### Set up the environment
-
-For dependency isolation, we suggest you create a virtual environment.
-
-```bash
-python -m venv venv
-source venv/bin/activate
-```
-
-Install the required dependencies.
+## Install dependencies
 
 ```bash
-pip install -U pip && pip install -r requirements.txt
+git clone -b 1.2 https://github.com/bentoml/BentoControlNet.git
+cd BentoControlNet
+pip install -r requirements.txt
 ```
 
-### Start a local ControlNet server
+## Run the BentoML Service
 
-Run the script to download the models.
+We have defined a BentoML Service in `service.py`. Run `bentoml serve` in your project directory to start the Service.
+
+```python
+$ bentoml serve .
+
+2024-01-18T09:43:40+0800 [INFO] [cli] Prometheus metrics for HTTP BentoServer from "service:APIService" can be accessed at http://localhost:3000/metrics.
+2024-01-18T09:43:41+0800 [INFO] [cli] Starting production HTTP BentoServer from "service:APIService" listening on http://localhost:3000 (Press CTRL+C to quit)
+```
+
+The server is now active at [http://localhost:3000](http://localhost:3000/). You can interact with it using the Swagger UI or in other different ways.
+
+CURL
 
 ```bash
-python import_model.py
+curl -X 'POST' \
+    'http://localhost:3000/generate' \
+    -H 'accept: image/*' \
+    -H 'Content-Type: multipart/form-data' \
+    -F 'image=@example-image.png;type=image/png' \
+    -F 'params={
+    "prompt": "A young man walking in a park, wearing jeans.",
+    "negative_prompt": "ugly, disfigured, ill-structured, low resolution",
+    "controlnet_conditioning_scale": 0.5,
+    "num_inference_steps": 25
+    }'
 ```
 
-The models are saved to the BentoML Model Store, a centralized repository for managing models. Run `bentoml models list` to view all available models locally.
+BentoML client
 
-Run `bentoml serve` to start a server locally. The server is accessible at http://0.0.0.0:3000.
+```python
+import bentoml
+from pathlib import Path
 
-### Build a Bento
+with bentoml.SyncHTTPClient("http://localhost:3000") as client:
+    result = client.generate(
+        image=Path("example-image.png"),
+        params={
+                "prompt": "A young man walking in a park, wearing jeans.",
+                "negative_prompt": "ugly, disfigured, ill-structure, low resolution",
+                "controlnet_conditioning_scale": 0.5,
+                "num_inference_steps": 25
+        },
+    )
+```
 
-A [Bento](https://docs.bentoml.com/en/latest/concepts/bento.html) in BentoML is a deployable artifact including model reference, data files, and dependencies. Once a Bento is built, you can containerize it as a Docker image or distribute it on [BentoCloud](https://www.bentoml.com/cloud) for better management, scalability and observability.
+## Deploy to production
 
-The `bentofile.yaml` file required to build a Bento is already available in the project directory with some basic configurations, while you can also customize it as needed. See [Bento build options](https://docs.bentoml.com/en/latest/concepts/bento.html#bento-build-options) to learn more.
+After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. A configuration YAML file (`bentofile.yaml`) is used to define the build options for your application. See [Bento build options](https://docs.bentoml.com/en/latest/concepts/bento.html#bento-build-options) to learn more.
 
-To build a Bento, run:
+Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/1.2/bentocloud/how-tos/manage-access-token.html), then run the following command in your project directory to deploy the application to BentoCloud.
 
 ```bash
-$ bentoml build
+bentoml deploy .
 ```
 
-To build a Docker image for the Bento, run:
+Once the application is up and running on BentoCloud, you can access it via the exposed URL.
 
-```bash
-bentoml containerize BENTO_TAG
-```
-
-To push the Bento to BentoCloud, [log in to BentoCloud](https://docs.bentoml.com/en/latest/bentocloud/how-tos/manage-access-token.html) first and run the following command:
-
-```bash
-bentoml push BENTO_TAG
-```
-
-You can then [deploy the Bento](https://docs.bentoml.com/en/latest/bentocloud/how-tos/deploy-bentos.html) on BentoCloud.
+**Note**: Alternatively, you can use BentoML to generate a [Docker image](https://docs.bentoml.com/en/1.2/guides/containerization.html) for a custom deployment.

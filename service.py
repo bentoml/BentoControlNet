@@ -5,25 +5,30 @@ import typing as t
 import cv2
 import numpy as np
 import PIL
+from PIL.Image import Image as PIL_Image
+
 import torch
 from diffusers import StableDiffusionXLControlNetPipeline, ControlNetModel, AutoencoderKL
 from pydantic import BaseModel
 
 import bentoml
-from bentoml.io import JSON, Image, Multipart
+
+CONTROLNET_MODEL_ID = "diffusers/controlnet-canny-sdxl-1.0"
+VAE_MODEL_ID = "madebyollin/sdxl-vae-fp16-fix"
+BASE_MODEL_ID = "stabilityai/stable-diffusion-xl-base-1.0"
 
 
-if t.TYPE_CHECKING:
-    from PIL.Image import Image as PIL_Image
-    from numpy.typing import NDArray
-
-controlnet_model = bentoml.models.get("sdxl-controlnet")
-base_model = bentoml.models.get("sdxl-controlnet-base")
-vae_model = bentoml.models.get("sdxl-controlnet-vae")
-
-class SDXLControlNetRunnable(bentoml.Runnable):
-    SUPPORTED_RESOURCES = ('nvidia.com/gpu', 'cpu')
-    SUPPORTS_CPU_MULTI_THREADING = True
+@bentoml.service(
+    traffic={"timeout": 600},
+    workers=1,
+    resources={
+        "gpu": "1",
+        "gpu_type": "nvidia-l4",
+        # we can also specify GPU memory requirement:
+        # "memory": "16Gi",
+    }
+)
+class SDXLControlNetService:
 
     def __init__(self) -> None:
 
@@ -35,67 +40,61 @@ class SDXLControlNetRunnable(bentoml.Runnable):
             self.dtype = torch.float32
 
         self.controlnet = ControlNetModel.from_pretrained(
-            controlnet_model.path,
+            CONTROLNET_MODEL_ID,
             torch_dtype=self.dtype,
         )
 
         self.vae = AutoencoderKL.from_pretrained(
-            vae_model.path,
+            VAE_MODEL_ID,
             torch_dtype=self.dtype,
         )
 
         self.pipe = StableDiffusionXLControlNetPipeline.from_pretrained(
-            base_model.path,
+            BASE_MODEL_ID,
             controlnet=self.controlnet,
             vae=self.vae,
             torch_dtype=self.dtype
         ).to(self.device)
 
 
-    @bentoml.Runnable.method(batchable=False)
-    def generate(
+    @bentoml.api
+    async def generate(
             self,
             prompt: str,
-            arr: NDArray,
+            arr: np.ndarray[t.Any, np.uint8],
             **kwargs,
     ):
         image = PIL.Image.fromarray(arr)
         return self.pipe(prompt, image=image, **kwargs).to_tuple()
 
 
-runner = bentoml.Runner(
-    SDXLControlNetRunnable,
-    name=f"sdxl-controlnet-runner",
-    models=[controlnet_model, base_model, vae_model]
-)
-
-svc = bentoml.Service(f"sdxl-controlnet-service", runners=[runner])
-
 class Params(BaseModel):
     prompt: str
     negative_prompt: t.Optional[str]
     controlnet_conditioning_scale: float = 0.5
+    num_inference_steps: int = 25
 
-params_sample = Params(
-    prompt="aerial view, a futuristic bento box in a bright foggy jungle, hard lighting",
-    negative_prompt="low quality, bad quality, sketches",
-)
 
-@svc.api(
-    route="/generate",
-    input=Multipart(image=Image(), params=JSON.from_sample(params_sample)),
-    output=Image(),
+@bentoml.service(
+    name="sdxl-controlnet-service",
+    traffic={"timeout": 600},
+    workers=8,
+resources={"cpu": "1"}
 )
-async def generate(image: PIL_Image, params: Params):
-    arr = np.array(image)
-    arr = cv2.Canny(arr, 100, 200)
-    arr = arr[:, :, None]
-    arr = np.concatenate([arr, arr, arr], axis=2)
-    params_d = params.dict()
-    prompt = params_d.pop("prompt")
-    res = await runner.generate.async_run(
-        prompt,
-        arr=arr,
-        **params_d
-    )
-    return res[0][0]
+class ControlNet:
+    controlnet_service: SDXLControlNetService = bentoml.depends(SDXLControlNetService)
+
+    @bentoml.api
+    async def generate(self, image: PIL_Image, params: Params) -> PIL_Image:
+        arr = np.array(image)
+        arr = cv2.Canny(arr, 100, 200)
+        arr = arr[:, :, None]
+        arr = np.concatenate([arr, arr, arr], axis=2)
+        params_d = params.dict()
+        prompt = params_d.pop("prompt")
+        res = await self.controlnet_service.generate(
+            prompt,
+            arr=arr,
+            **params_d
+        )
+        return res[0][0]
