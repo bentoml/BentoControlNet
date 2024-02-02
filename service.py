@@ -74,13 +74,13 @@ class Params(BaseModel):
 
 
 @bentoml.service(
-    name="sdxl-controlnet-service",
+    name="sdxl-controlnet",
     traffic={"timeout": 600},
     workers=8,
 resources={"cpu": "1"}
 )
 class ControlNet:
-    controlnet_service: SDXLControlNetService = bentoml.depends(SDXLControlNetService)
+    controlnet_service = bentoml.depends(SDXLControlNetService)
 
     @bentoml.api
     async def generate(self, image: PIL_Image, params: Params) -> PIL_Image:
