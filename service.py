@@ -74,7 +74,6 @@ class Params(BaseModel):
 
 
 @bentoml.service(
-    name="sdxl-controlnet",
     traffic={"timeout": 600},
     workers=8,
 resources={"cpu": "1"}
