@@ -2,13 +2,10 @@ from __future__ import annotations
 
 import typing as t
 
-import cv2
 import numpy as np
 import PIL
 from PIL.Image import Image as PIL_Image
 
-import torch
-from diffusers import StableDiffusionXLControlNetPipeline, ControlNetModel, AutoencoderKL
 from pydantic import BaseModel
 
 import bentoml
@@ -29,6 +26,9 @@ BASE_MODEL_ID = "stabilityai/stable-diffusion-xl-base-1.0"
 class SDXLControlNetService:
 
     def __init__(self) -> None:
+
+        import torch
+        from diffusers import StableDiffusionXLControlNetPipeline, ControlNetModel, AutoencoderKL
 
         if torch.cuda.is_available():
             self.device = "cuda"
@@ -83,6 +83,8 @@ class ControlNet:
 
     @bentoml.api
     async def generate(self, image: PIL_Image, params: Params) -> PIL_Image:
+        import cv2
+
         arr = np.array(image)
         arr = cv2.Canny(arr, 100, 200)
         arr = arr[:, :, None]
