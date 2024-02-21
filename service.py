@@ -19,7 +19,7 @@ BASE_MODEL_ID = "stabilityai/stable-diffusion-xl-base-1.0"
     traffic={"timeout": 600},
     workers=1,
     resources={
-        "gpu": "1",
+        "gpu": 1,
         "gpu_type": "nvidia-l4",
     }
 )
