@@ -1,3 +1,14 @@
+<div align="center">
+    <h1 align="center">BentoControlNet</h1>
+    <br>
+    <strong>Precise image generation by guiding diffusion models with additional inputs like sketches or depth maps for targeted results.<br></strong>
+    <i>Powered by BentoML 🍱</i>
+    <br>
+</div>
+<br>
+
+ControlNet is a model designed to control image diffusion processes by conditioning them with additional input images, such as canny edges, user sketches, human poses, depth maps, and more. This allows for greater control over image generation by guiding the model with specific inputs, making it easier to generate targeted images.
+
 This project demonstrates how to build a ControlNet application using BentoML, powered by [diffusers](https://github.com/huggingface/diffusers).
 
 ## Prerequisites
@@ -61,11 +72,11 @@ with bentoml.SyncHTTPClient("http://localhost:3000") as client:
     )
 ```
 
-## Deploy to production
+## Deploy to BentoCloud
 
-After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. A configuration YAML file (`bentofile.yaml`) is used to define the build options for your application. See [Bento build options](https://docs.bentoml.com/en/latest/concepts/bento.html#bento-build-options) to learn more.
+After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
 
-Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/1.2/bentocloud/how-tos/manage-access-token.html), then run the following command in your project directory to deploy the application to BentoCloud.
+Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/bentocloud/how-tos/manage-access-token.html), then run the following command to deploy it.
 
 ```bash
 bentoml deploy .
@@ -73,4 +84,4 @@ bentoml deploy .
 
 Once the application is up and running on BentoCloud, you can access it via the exposed URL.
 
-**Note**: Alternatively, you can use BentoML to generate a [Docker image](https://docs.bentoml.com/en/1.2/guides/containerization.html) for a custom deployment.
+**Note**: For custom deployment in your own infrastructure, use [BentoML to generate an OCI-compliant image](https://docs.bentoml.com/en/latest/guides/containerization.html).
