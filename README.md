@@ -54,7 +54,7 @@ curl -X 'POST' \
     }'
 ```
 
-BentoML client
+Python client
 
 ```python
 import bentoml
