@@ -4,7 +4,7 @@
 
 ControlNet is a model designed to control image diffusion processes by conditioning them with additional input images, such as canny edges, user sketches, human poses, depth maps, and more. This allows for greater control over image generation by guiding the model with specific inputs, making it easier to generate targeted images.
 
-This is a BentoML example project, demonstrating how to build an image generation inference API server, using the [SDXL model](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) and [the ControlNet model](https://huggingface.co/diffusers/controlnet-canny-sdxl-1.0). See [here](https://github.com/bentoml/BentoML?tab=readme-ov-file#%EF%B8%8F-what-you-can-build-with-bentoml) for a full list of BentoML example projects.
+This is a BentoML example project, demonstrating how to build an image generation inference API server, using the [SDXL model](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) and [the ControlNet model](https://huggingface.co/diffusers/controlnet-canny-sdxl-1.0). See [here](https://github.com/bentoml/BentoML/tree/main/examples) for a full list of BentoML example projects.
 
 ## Prerequisites
 
