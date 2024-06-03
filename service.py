@@ -6,8 +6,6 @@ import numpy as np
 import PIL
 from PIL.Image import Image as PIL_Image
 
-from pydantic import BaseModel
-
 import bentoml
 
 CONTROLNET_MODEL_ID = "diffusers/controlnet-canny-sdxl-1.0"
@@ -54,24 +52,36 @@ class ControlNet:
         ).to(self.device)
 
     @bentoml.api
-    def generate(self, image: PIL_Image, params: Params) -> PIL_Image:
+    def generate(
+            self,
+            image: PIL_Image,
+            prompt: str,
+            negative_prompt: t.Optional[str] = None,
+            controlnet_conditioning_scale: t.Optional[float] = 1.0,
+            num_inference_steps: t.Optional[int] = 50,
+            guidance_scale: t.Optional[float] = 5.0,
+    ) -> PIL_Image:
         import cv2
-        
+
+        if controlnet_conditioning_scale is None:
+            controlnet_conditioning_scale = 1.0
+
+        if num_inference_steps is None:
+            num_inference_steps = 50
+
+        if guidance_scale is None:
+            guidance_scale = 5.0
+
         arr = np.array(image)
         arr = cv2.Canny(arr, 100, 200)
         arr = arr[:, :, None]
         arr = np.concatenate([arr, arr, arr], axis=2)
-        params_d = params.dict()
-        prompt = params_d.pop("prompt")
         image = PIL.Image.fromarray(arr)
         return self.pipe(
             prompt,
             image=image,
-            **params_d
+            negative_prompt=negative_prompt,
+            controlnet_conditioning_scale=controlnet_conditioning_scale,
+            num_inference_steps=num_inference_steps,
+            guidance_scale=guidance_scale,
         ).to_tuple()[0][0]
-    
-class Params(BaseModel):
-    prompt: str
-    negative_prompt: t.Optional[str]
-    controlnet_conditioning_scale: float = 0.5
-    num_inference_steps: int = 25

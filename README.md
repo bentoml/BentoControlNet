@@ -41,12 +41,10 @@ curl -X 'POST' \
     -H 'accept: image/*' \
     -H 'Content-Type: multipart/form-data' \
     -F 'image=@example-image.png;type=image/png' \
-    -F 'params={
-    "prompt": "A young man walking in a park, wearing jeans.",
-    "negative_prompt": "ugly, disfigured, ill-structured, low resolution",
-    "controlnet_conditioning_scale": 0.5,
-    "num_inference_steps": 25
-    }'
+	-F 'prompt=A young man walking in a park, wearing jeans.' \
+	-F 'negative_prompt=ugly, disfigured, ill-structured, low resolution' \
+	-F 'controlnet_conditioning_scale=0.5' \
+	-F 'num_inference_steps=25'
 ```
 
 Python client
@@ -58,12 +56,10 @@ from pathlib import Path
 with bentoml.SyncHTTPClient("http://localhost:3000") as client:
     result = client.generate(
         image=Path("example-image.png"),
-        params={
-                "prompt": "A young man walking in a park, wearing jeans.",
-                "negative_prompt": "ugly, disfigured, ill-structure, low resolution",
-                "controlnet_conditioning_scale": 0.5,
-                "num_inference_steps": 25
-        },
+        prompt="A young man walking in a park, wearing jeans.",
+        negative_prompt="ugly, disfigured, ill-structure, low resolution",
+        controlnet_conditioning_scale=0.5,
+        num_inference_steps=25,
     )
 ```
 
