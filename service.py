@@ -54,7 +54,7 @@ class ControlNet:
         ).to(self.device)
 
     @bentoml.api
-    async def generate(self, image: PIL_Image, params: Params) -> PIL_Image:
+    def generate(self, image: PIL_Image, params: Params) -> PIL_Image:
         import cv2
         
         arr = np.array(image)
